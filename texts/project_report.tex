@@ -1,0 +1,57 @@
+%%
+%% Author: natasha
+%% 03.10.18
+%%
+
+
+\documentclass[a4paper, 11pt]{article}
+\usepackage{comment} % enables the use of multi-line comments (\ifx \fi)
+\usepackage{lipsum} %This package just generates Lorem Ipsum filler text.
+\usepackage{fullpage} % changes the margin
+
+\begin{document}
+    %Header-Make sure you update this information!!!!
+    \noindent
+    \large\textbf{Post/Pre-Lab X Report} \hfill\\
+    \normalsize ECE 100-003 \hfill Teammates: Safin Alexander, Pavlovskaia Natalia \\
+
+    \section*{Problem Statement}
+    Put your Problem statement here! Example of a Citation\cite[p.219]{Robotics}. Here's Another Citation\cite{Flueck}
+
+    \section*{Investigation/Research}
+    \lipsum[2]
+
+    \section*{Alternative Solutions}
+    \lipsum[3]
+
+    \section*{Optimum Solution}
+    \lipsum[4]
+    % to comment sections out, use the command \ifx and \fi. Use this technique when writing your pre lab. For example, to comment something out I would do:
+    %  \ifx
+    %	\begin{itemize}
+    %		\item item1
+    %		\item item2
+    %	\end{itemize}
+    %  \fi
+
+    \section*{Construction/Implementation}
+    \lipsum[5]
+
+    \section*{Analysis \& Testing}
+    \lipsum[6]
+
+    \section*{Final Evaluation}
+    \lipsum[7]
+
+    \section*{Attachments}
+    %Make sure to change these
+    Lab Notes, HelloWorld.ic, FooBar.ic
+    %\fi %comment me out
+
+    \begin{thebibliography}{9}
+        \bibitem{Robotics} Fred G. Martin \emph{Robotics Explorations: A Hands-On Introduction to Engineering}. New Jersey: Prentice Hall.
+        \bibitem{Flueck}  Flueck, Alexander J. 2005. \emph{ECE 100}[online]. Chicago: Illinois Institute of Technology, Electrical and Computer Engineering Department, 2005 [cited 30
+        August 2005]. Available from World Wide Web: (http://www.ece.iit.edu/~flueck/ece100).
+    \end{thebibliography}
+
+\end{document}
