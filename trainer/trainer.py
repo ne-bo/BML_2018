@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 from base import BaseTrainer
 from utils import freeze_network
+from utils.generate_images import generate_images
 
 
 class Trainer(BaseTrainer):
@@ -23,7 +24,7 @@ class Trainer(BaseTrainer):
         self.batch_size = data_loader.batch_size
         self.data_loader = data_loader
         self.valid_data_loader = valid_data_loader
-        self.do_validation = self.valid_data_loader is not None
+        self.do_validation = False  # self.valid_data_loader is not None
         self.log_step = int(np.sqrt(self.batch_size))
         self.optimizers_and_schedulers = optimizers_and_schedulers
 
@@ -50,11 +51,21 @@ class Trainer(BaseTrainer):
 
             The metrics in log must have the key 'metrics'.
         """
-        self.model.train()
+        self.model.decoder.eval()
+        self.model.code_generator.eval()
+
+        generate_images(self.model.code_generator, self.model.decoder,
+                        save_path=self.config['generated_images_path'],
+                        epoch=epoch, device=self.device, images_number=16)
+
+        self.model.encoder.train()
+        self.model.decoder.train()
+        self.model.code_generator.train()
+        self.model.d_i.train()
+        self.model.d_c.train()
 
         total_loss = 0
         total_metrics = np.zeros(len(self.metrics))
-        batch_size = self.data_loader.batch_size
         for batch_idx, (data, target) in enumerate(self.data_loader):
             x, target = data.to(self.device), target.to(self.device)
 
@@ -65,7 +76,7 @@ class Trainer(BaseTrainer):
             # zc ← CG(z)
             # xrec ← dec(enc(x))
 
-            z = torch.randn(batch_size, self.model.noise_size, 1, 1, requires_grad=True, device=self.device)
+            z = torch.randn(x.shape[0], self.model.noise_size, 1, 1, requires_grad=True, device=self.device)
             d_c_enc_x, d_c_z_c, x_rec = self.model(x, z, phase='AAE')
 
             l_c, l_combined, l_rec = self.calculate_losses_for_AAE_phase(d_c_enc_x, d_c_z_c, x, x_rec)
@@ -79,7 +90,7 @@ class Trainer(BaseTrainer):
             # zc ← CG(z)
             # xnoise ← dec(zc)
             # xrec ← dec(enc(xj ))
-            z = torch.randn(batch_size, self.model.noise_size, 1, 1, requires_grad=True, device=self.device)
+            z = torch.randn(x.shape[0], self.model.noise_size, 1, 1, requires_grad=True, device=self.device)
             d_i_x, d_i_dec_z_c, d_i_x_rec = self.model(x, z, phase='PriorImprovement')
 
             l_i, minus_l_i = self.calculate_losses_for_prior_improvement_phase(d_i_dec_z_c, d_i_x, d_i_x_rec)

@@ -1,5 +1,5 @@
 {
-  "name": "Mnist_LeNet",
+  "name": "Mnist_AAEP",
   "n_gpu": 1,
   "arch": {
     "type": "MnistModel",
@@ -42,7 +42,7 @@
   "optimizer_d_i": {
     "type": "Adam",
     "args": {
-      "lr": 0.0001,
+      "lr": 0.001,
       "weight_decay": 0,
       "amsgrad": true
     }
@@ -78,5 +78,6 @@
   "visualization": {
     "tensorboardX": true,
     "log_dir": "saved/runs"
-  }
+  },
+  "generated_images_path": "/home/natasha/generated_images"
 }

@@ -129,7 +129,11 @@ class BaseTrainer:
             'epoch': epoch,
             'logger': self.train_logger,
             'state_dict': self.model.state_dict(),
-            'optimizer': self.optimizer.state_dict(),
+            'optimizer_encoder': self.optimizer.encoder_optimizer.state_dict(),
+            'optimizer_decoder': self.optimizer.decoder_optimizer.state_dict(),
+            'optimizer_code_generator': self.optimizer.code_generator_optimizer.state_dict(),
+            'optimizer_d_i': self.optimizer.d_i_optimizer.state_dict(),
+            'optimizer_d_c': self.optimizer.d_c_optimizer.state_dict(),
             'monitor_best': self.monitor_best,
             'config': self.config
         }
@@ -160,11 +164,15 @@ class BaseTrainer:
         self.model.load_state_dict(checkpoint['state_dict'])
 
         # load optimizer state from checkpoint only when optimizer type is not changed. 
-        if checkpoint['config']['optimizer']['type'] != self.config['optimizer']['type']:
+        if checkpoint['config']['optimizer_encoder']['type'] != self.config['optimizer_encoder']['type']:
             self.logger.warning('Warning: Optimizer type given in config file is different from that of checkpoint. ' + \
                                 'Optimizer parameters not being resumed.')
         else:
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
+            self.optimizer.encoder_optimizer.load_state_dict(checkpoint['optimizer_encoder'])
+            self.optimizer.decoder_optimizer.load_state_dict(checkpoint['optimizer_decoder'])
+            self.optimizer.code_generator_optimizer.load_state_dict(checkpoint['optimizer_code_generator'])
+            self.optimizer.d_i_optimizer.load_state_dict(checkpoint['optimizer_d_i'])
+            self.optimizer.d_c_optimizer.load_state_dict(checkpoint['optimizer_d_c'])
 
         self.train_logger = checkpoint['logger']
         self.logger.info("Checkpoint '{}' (epoch {}) loaded".format(resume_path, self.start_epoch))
