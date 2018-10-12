@@ -1,85 +1,54 @@
-import torch.nn as nn
-import torch.nn.functional as F
 from base import BaseModel
+from model.networks.networks import Encoder, Decoder, CodeGenerator, ImageDiscriminator, CodeDiscriminator
 
 
-# Residual block
-# Input feature map
-# 3 x 3 conv. out channels RELU stride 2 pad 1
-# 3 x 3 conv. out channels RELU stride 1 pad 1
-# skip connection output = input + residual
-# RELU
-class ResidualBlock(BaseModel):
-    def __init__(self, in_channels, out_channels):
-        super(ResidualBlock, self).__init__()
-        self.conv1 = nn.Sequential(nn.Conv2d(in_channels=in_channels,
-                                             out_channels=out_channels,
-                                             kernel_size=3, stride=2, padding=1),
-                                   nn.ReLU(inplace=True))
-        self.conv2 = nn.Sequential(nn.Conv2d(in_channels=out_channels,
-                                             out_channels=out_channels,
-                                             kernel_size=3, stride=1, padding=1),
-                                   nn.ReLU(inplace=True))
-        self.relu = nn.ReLU(inplace=True)
+class MnistModel(BaseModel):
+    def __init__(self, input_image_channels=1, out_image_channels=1, code_size=8, noise_size=8, input_image_size=28):
+        super(MnistModel, self).__init__()
 
-    def forward(self, x):
-        res = self.conv1(x)
-        res = self.conv2(res)
-        output = x + res
-        output = self.relu(output)
-        return output
+        self.code_size = code_size
+        self.noise_size = noise_size
+        self.input_image_size = input_image_size
 
+        self.encoder = Encoder(code_size=code_size, input_image_channels=input_image_channels,
+                               input_image_size=input_image_size)
+        self.decoder = Decoder(code_size=code_size, out_image_channels=out_image_channels)
+        self.code_generator = CodeGenerator(code_size=code_size, noise_size=noise_size)
+        self.d_i = ImageDiscriminator(input_image_channels=input_image_channels,
+                                      input_image_size=input_image_size)
+        self.d_c = CodeDiscriminator(code_size=code_size)
 
-# Encoder
-# Input 32 x 32 images
-# 3 x 3 conv. 64 RELU stride 2 pad 1
-# 3 x 3 residual block 64
-# 3 x 3 down sampling residual block 128 stride 2
-# 3 x 3 down sampling residual block 256 stride 2
-# 3 x 3 down sampling residual block 512 stride 2
-# 4 x 4 avg. pooling stride 1
-# FC. 2 x code size BN. RELU
-# FC. code size Linear
+    # here the input x is an image, and the input z is a gaussian noise
+    def forward(self, x, z, phase=None):
+        assert phase in ['AAE', 'PriorImprovement']
 
-class Encoder(BaseModel):
-    def __init__(self, code_size=8):
-        super(Encoder, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=3, stride=2, padding=1)
-        self.residual_block1 = ResidualBlock(in_channels=64, out_channels=64)
+        assert z.shape[1] == self.noise_size
 
-        self.down_sampling1 = nn.Sequential(DownSampling(), ResidualBlock(in_channels=128, out_channels=128))
-        self.down_sampling2 = nn.Sequential(DownSampling(), ResidualBlock(in_channels=256, out_channels=256))
-        self.down_sampling3 = nn.Sequential(DownSampling(), ResidualBlock(in_channels=512, out_channels=512))
-        self.pooling = nn.AvgPool2d(kernel_size=4, stride=1)
-        self.fc1 = nn.Sequential(nn.Linear(???, 2 * code_size), nn.BatchNorm2d(2 * code_size), nn.ReLU(inplace=True))
-        self.fc2 = nn.Linear(2 * code_size, code_size)
+        z_c = self.code_generator(z)
+        latent_code = self.encoder(x)
+        x_rec = self.decoder(self.encoder(x))
+        assert x.shape == x_rec.shape
 
-    def forward(self, x):
-        # we should have input image 32 x 32
-        assert x.shape[-1] == 32
-        assert x.shape[-2] == 32
+        # In one phase, termed the prior improvement phase,
+        # we update the code generator with the loss function in Eq. (4), by fixing the encoder
+        if phase == 'PriorImprovement':
+            # pass the noise
+            dec_z_c = self.decoder(z_c)
+            d_i_dec_z_c, _ = self.d_i(dec_z_c)
+            # pass the image
+            d_i_x, _ = self.d_i(self.decoder(latent_code))
+            d_i_x_rec, _ = self.d_i(x_rec)
+            # return vectors we need to use inside the loss
+            return d_i_x, d_i_dec_z_c, d_i_x_rec
 
-        x = self.conv1(x)
-        x = self.residual_block1(x)
-        x = self.down_sampling1(x)
-        x = self.down_sampling2(x)
-        x = self.down_sampling3(x)
-        x = self.pooling(x)
-        x = self.fc1(x)
-        x = self.fc2(x)
-
-        return x
-
-# Decoder
-# Input latent code ∈ Rcode size
-# 4 x 4 upconv. 512 BN. RELU stride 1
-# 4 x 4 up sampling residual block 256 stride 2
-# 4 x 4 up sampling residual block 128 stride 2
-# 4 x 4 up sampling residual block 64 stride 2
-# 3 x 3 conv. image channels Tanh
-
-
-# Code Generator
-# Input noise ∈ Rnoise size
-# FC. 2 x noise size BN. RELU
-# FC. latent code size BN. Linear
+        # In the other phase, termed the AAE phase,
+        # we fix the code generator and update the autoencoder following the training procedure of AAE.
+        # Specifically, the encoder output has to be regularized by the following adversarial
+        # loss:
+        if phase == 'AAE':
+            # pass the noise
+            d_c_z_c = self.d_c(z_c)
+            # pass the image
+            d_c_enc_x = self.d_c(latent_code)
+            # return vectors we need to use inside the loss
+            return d_c_enc_x, d_c_z_c, x_rec

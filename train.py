@@ -6,12 +6,9 @@ import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
+from model.optimizers.optimizers import OurOptimizersAndSchedulers
 from trainer import Trainer
-from utils import Logger
-
-
-def get_instance(module, name, config, *args):
-    return getattr(module, config[name]['type'])(*args, **config[name]['args'])
+from utils import Logger, get_instance
 
 
 def main(config, resume):
@@ -26,20 +23,18 @@ def main(config, resume):
     model.summary()
 
     # get function handles of loss and metrics
-    loss = getattr(module_loss, config['loss'])
+    loss = module_loss.OurLosses()
     metrics = [getattr(module_metric, met) for met in config['metrics']]
 
     # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for disabling scheduler
-    trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-    optimizer = get_instance(torch.optim, 'optimizer', config, trainable_params)
-    lr_scheduler = get_instance(torch.optim.lr_scheduler, 'lr_scheduler', config, optimizer)
 
-    trainer = Trainer(model, loss, metrics, optimizer,
+    optimizers_and_schedulers = OurOptimizersAndSchedulers(model, config)
+
+    trainer = Trainer(model, loss, metrics, optimizers_and_schedulers,
                       resume=resume,
                       config=config,
                       data_loader=data_loader,
                       valid_data_loader=valid_data_loader,
-                      lr_scheduler=lr_scheduler,
                       train_logger=train_logger)
 
     trainer.train()

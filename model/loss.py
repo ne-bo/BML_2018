@@ -1,5 +1,9 @@
-import torch.nn.functional as F
+from model.losses.losses import LC, LI, LRec
 
 
-def nll_loss(output, target):
-    return F.nll_loss(output, target)
+class OurLosses():
+    def __init__(self):
+        super(OurLosses, self).__init__()
+        self.l_c = LC()
+        self.l_i = LI()
+        self.l_rec = LRec()
