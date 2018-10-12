@@ -5,6 +5,7 @@ from torchvision.utils import make_grid
 from tqdm import tqdm
 
 from base import BaseTrainer
+from utils import freeze_network
 
 
 class Trainer(BaseTrainer):
@@ -54,7 +55,7 @@ class Trainer(BaseTrainer):
         total_loss = 0
         total_metrics = np.zeros(len(self.metrics))
         batch_size = self.data_loader.batch_size
-        for batch_idx, (data, target) in tqdm(enumerate(self.data_loader)):
+        for batch_idx, (data, target) in enumerate(self.data_loader):
             x, target = data.to(self.device), target.to(self.device)
 
             x = Variable(x, requires_grad=True).to(self.device)
@@ -71,6 +72,8 @@ class Trainer(BaseTrainer):
 
             self.update_AAE_phase(l_c, l_combined, l_rec)
 
+            # print('After AAE update l_c {:.6f}, l_combined {:.6f}, l_rec {:.6f}'.format(l_c, l_combined, l_rec))
+
             # // Prior improvement phase
             # z ∼ p(z)
             # zc ← CG(z)
@@ -83,18 +86,23 @@ class Trainer(BaseTrainer):
 
             self.update_prior_improvement_phase(l_i, minus_l_i)
 
+            # print('                                                                                           '
+            #      'After prior_improvement update l_i {:.6f}, minus_l_i {:.6f}'.format(l_i, minus_l_i))
+
             self.writer.set_step((epoch - 1) * len(self.data_loader) + batch_idx)
             self.writer.add_scalar('loss', l_i.item())
             total_loss += l_i.item()
             # total_metrics += self._eval_metrics(output, target)
 
             if self.verbosity >= 2 and batch_idx % self.log_step == 0:
-                self.logger.info('Train Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.6f}'.format(
+                self.logger.info('Train Epoch: {} [{}/{} ({:.0f}%)] Loss: l_i {:.6f} l_c {:.6f} l_rec {:.6f}'.format(
                     epoch,
                     batch_idx * self.data_loader.batch_size,
                     self.data_loader.n_samples,
                     100.0 * batch_idx / len(self.data_loader),
-                    l_i.item()))
+                    l_i.item(),
+                    l_c.item(),
+                    l_rec.item()))
 
         log = {
             'loss': total_loss / len(self.data_loader),
@@ -122,9 +130,9 @@ class Trainer(BaseTrainer):
 
     def calculate_losses_for_AAE_phase(self, d_c_enc_x, d_c_z_c, x, x_rec):
         # LC GAN ← log(DC (zc)) + log(1 − DC (enc(x)))
-        l_c = self.loss.l_c(d_c_enc_x, d_c_z_c)
+        l_c = self.loss.l_c(d_c_enc_x=d_c_enc_x, d_c_z_c=d_c_z_c)
         # Lrec ← 1NkF(x) − F(xrec)k2
-        l_rec = self.loss.l_rec(x, x_rec)
+        l_rec = self.loss.l_rec(x=x, x_rec=x_rec)
         l_combined = -l_c + l_rec
         return l_c, l_combined, l_rec
 
@@ -134,11 +142,13 @@ class Trainer(BaseTrainer):
         #####################################
         # I think that code_generator should be updated here using l_i loss
         #####################################
+
         self.optimizers_and_schedulers.d_i_optimizer.zero_grad()
         self.optimizers_and_schedulers.code_generator_optimizer.zero_grad()
         l_i.backward(retain_graph=True)
         self.optimizers_and_schedulers.d_i_optimizer.step()
         self.optimizers_and_schedulers.code_generator_optimizer.step()
+
         # θdec ← θdec − ∇θdec (−LIGAN )
         self.optimizers_and_schedulers.decoder_optimizer.zero_grad()
         minus_l_i.backward()
@@ -150,10 +160,12 @@ class Trainer(BaseTrainer):
         self.optimizers_and_schedulers.d_c_optimizer.zero_grad()
         l_c.backward(retain_graph=True)
         self.optimizers_and_schedulers.d_c_optimizer.step()
+
         # θenc ← θenc − ∇θenc(−LCGAN + Lrec)
         self.optimizers_and_schedulers.encoder_optimizer.zero_grad()
         l_combined.backward(retain_graph=True)
         self.optimizers_and_schedulers.encoder_optimizer.step()
+
         # θdec ← θdec − ∇θdec (λ ∗ Lrec)
         self.optimizers_and_schedulers.decoder_optimizer.zero_grad()
         l_rec.backward()

@@ -8,3 +8,13 @@ def ensure_dir(path):
 
 def get_instance(module, name, config, *args):
     return getattr(module, config[name]['type'])(*args, **config[name]['args'])
+
+
+def freeze_network(network):
+    for p in network.parameters():
+        p.requires_grad = False
+
+
+def unfreeze_network(network):
+    for p in network.parameters():
+        p.requires_grad = True
