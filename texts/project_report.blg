@@ -1,0 +1,52 @@
+This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: project_report.aux
+The style file: plain.bst
+Database file #1: sample.bib
+Warning--I didn't find a database entry for "Robotics"
+Warning--I didn't find a database entry for "Flueck"
+Warning--to sort, need author or key in original_paper
+Warning--empty author in original_paper
+Warning--empty journal in original_paper
+You've used 1 entry,
+            2118 wiz_defined-function locations,
+            504 strings with 4097 characters,
+and the built_in function-call counts, 183 in all, are:
+= -- 15
+> -- 1
+< -- 0
++ -- 1
+- -- 0
+* -- 13
+:= -- 30
+add.period$ -- 2
+call.type$ -- 1
+change.case$ -- 3
+chr.to.int$ -- 0
+cite$ -- 4
+duplicate$ -- 10
+empty$ -- 19
+format.name$ -- 0
+if$ -- 36
+int.to.chr$ -- 0
+int.to.str$ -- 1
+missing$ -- 1
+newline$ -- 7
+num.names$ -- 0
+pop$ -- 6
+preamble$ -- 1
+purify$ -- 2
+quote$ -- 0
+skip$ -- 7
+stack$ -- 0
+substring$ -- 5
+swap$ -- 0
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 4
+warning$ -- 3
+while$ -- 0
+width$ -- 2
+write$ -- 9
+(There were 5 warnings)

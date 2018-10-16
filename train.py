@@ -1,5 +1,5 @@
 import os
-import json
+import jstyleson
 import argparse
 import torch
 import data_loader.data_loaders as module_data
@@ -12,6 +12,7 @@ from utils import Logger, get_instance
 
 
 def main(config, resume):
+    torch.cuda.empty_cache()
     train_logger = Logger()
 
     # setup data_loader instances
@@ -52,7 +53,7 @@ if __name__ == '__main__':
 
     if args.config:
         # load config file
-        config = json.load(open(args.config))
+        config = jstyleson.load(open(args.config))
         path = os.path.join(config['trainer']['save_dir'], config['name'])
     elif args.resume:
         # load config file from checkpoint, in case new config file is not given.

@@ -9,50 +9,50 @@
     "type": "MnistDataLoader",
     "args": {
       "data_dir": "data/",
-      "batch_size": 128,
+      "batch_size": 64,
       "shuffle": true,
       "validation_split": 0.1,
       "num_workers": 2
     }
   },
   "optimizer_encoder": {
-    "type": "Adam",
+    "type": "RMSprop",
     "args": {
-      "lr": 0.0001,
-      "weight_decay": 0,
-      "amsgrad": true
+      "lr": 0.0003,
+      "weight_decay": 0
+      //"amsgrad": true
     }
   },
   "optimizer_decoder": {
-    "type": "Adam",
+    "type": "RMSprop",
     "args": {
-      "lr": 0.0001,
-      "weight_decay": 0,
-      "amsgrad": true
+      "lr": 0.0003,
+      "weight_decay": 0
+      //"amsgrad": true
     }
   },
   "optimizer_code_generator": {
-    "type": "Adam",
+    "type": "RMSprop",
     "args": {
-      "lr": 0.0001,
-      "weight_decay": 0,
-      "amsgrad": true
+      "lr": 0.0003,
+      "weight_decay": 0
+      //"amsgrad": true
     }
   },
   "optimizer_d_i": {
-    "type": "Adam",
+    "type": "RMSprop",
     "args": {
-      "lr": 0.001,
-      "weight_decay": 0,
-      "amsgrad": true
+      "lr": 0.0003,
+      "weight_decay": 0
+      //"amsgrad": true
     }
   },
   "optimizer_d_c": {
-    "type": "Adam",
+    "type": "RMSprop",
     "args": {
-      "lr": 0.0001,
-      "weight_decay": 0,
-      "amsgrad": true
+      "lr": 0.00003,
+      "weight_decay": 0
+      //"amsgrad": true
     }
   },
   "loss": "nll_loss",
@@ -60,7 +60,7 @@
     "my_metric",
     "my_metric2"
   ],
-  "lr_scheduler_freq": 60,
+  "lr_scheduler_freq": 5,
   "lr_scheduler": {
     "type": "ExponentialLR",
     "args": {
@@ -72,12 +72,13 @@
     "save_dir": "saved/",
     "save_freq": 1,
     "verbosity": 2,
-    "monitor": "val_loss",
+    "monitor": "loss",
     "monitor_mode": "min"
   },
   "visualization": {
     "tensorboardX": true,
     "log_dir": "saved/runs"
   },
-  "generated_images_path": "/home/natasha/generated_images"
+  "generated_images_path": "/home/natasha/generated_images",
+  "z_scale": 5.0
 }

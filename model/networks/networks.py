@@ -234,15 +234,15 @@ class ImageDiscriminator(Module):
         assert x.shape[-2] == self.input_image_size
         x = self.conv1(x)
         x = self.conv2(x)
-        x = self.conv3(x)
-        x = x.squeeze(-1).squeeze(-1)
+        map_F = self.conv3(x)
+        x = map_F.squeeze(-1).squeeze(-1)
         x = self.fc(x)
 
         x1 = self.fc1(x)
         x1 = x1.view(x1.shape[0], x1.shape[1], 1, 1)
         x10 = self.fc10(x)
 
-        return x1, x10
+        return x1, x10, map_F
 
 
 # Code Discriminator

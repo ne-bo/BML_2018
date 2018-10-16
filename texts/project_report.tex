@@ -5,53 +5,127 @@
 
 
 \documentclass[a4paper, 11pt]{article}
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
 \usepackage{comment} % enables the use of multi-line comments (\ifx \fi)
 \usepackage{lipsum} %This package just generates Lorem Ipsum filler text.
 \usepackage{fullpage} % changes the margin
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos]{todonotes}
+%\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\captionsetup{compatibility=false}
+\usepackage{float}
+\usepackage{hyperref}
 
 \begin{document}
     %Header-Make sure you update this information!!!!
     \noindent
-    \large\textbf{Post/Pre-Lab X Report} \hfill\\
-    \normalsize ECE 100-003 \hfill Teammates: Safin Alexander, Pavlovskaia Natalia \\
+    \large\textbf{BML Project: Learning Priors for Adversarial Autoencoders} \hfill\\
+    \hfill Teammates: Belozerova Polina, Safin Alexander, Pavlovskaia Natalia \\
+
+    \begin{abstract}
+        This work is a reproducing of the \cite{original_paper}.
+
+        Most deep latent factor models choose simple priors for simplicity, tractability or
+        not knowing what prior to use. Recent studies show that the choice of the prior
+        may have a profound effect on the expressiveness of the model, especially when
+        its generative network has limited capacity. In this paper, we propose to learn a
+        proper prior from data for adversarial autoencoders (AAEs). We introduce the
+        notion of code generators to transform manually selected simple priors into ones
+        that can better characterize the data distribution. Experimental results show that
+        the proposed model can generate better image quality and learn better disentangled
+        representations than AAEs in both supervised and unsupervised settings. Lastly,
+        we present its ability to do cross-domain translation in a text-to-image synthesis
+        task.
+    \end{abstract}
 
     \section*{Problem Statement}
-    Put your Problem statement here! Example of a Citation\cite[p.219]{Robotics}. Here's Another Citation\cite{Flueck}
+    We decided to reproduce the following:
+    \begin{itemize}
+        \item {Unsupervised images generation}
+        \item {Supervised images generation}
+    \end{itemize}
 
-    \section*{Investigation/Research}
-    \lipsum[2]
+    \section*{Data}
+    The Datasets used:
+    \begin{itemize}
+        \item {MNIST}
+        \item {CIFAR-10}
+    \end{itemize}
 
-    \section*{Alternative Solutions}
-    \lipsum[3]
 
-    \section*{Optimum Solution}
-    \lipsum[4]
-    % to comment sections out, use the command \ifx and \fi. Use this technique when writing your pre lab. For example, to comment something out I would do:
-    %  \ifx
-    %	\begin{itemize}
-    %		\item item1
-    %		\item item2
-    %	\end{itemize}
-    %  \fi
+    \section*{Results}
+    \begin{itemize}
+        \item {Usupervised images generation
 
-    \section*{Construction/Implementation}
-    \lipsum[5]
+        \centering
+        \begin{tabular}{|c|c|c|}
+            \hline
+            Dataset & Model & Inception score \\\hline
 
-    \section*{Analysis \& Testing}
-    \lipsum[6]
 
-    \section*{Final Evaluation}
-    \lipsum[7]
+            & Our & ?? \\\cline{2-3}
+            MNIST & Original Paper & Unknown\\\cline{2-3}
+            \hline
+            & Our &??\\\cline{2-3}
+            CIFAR & Original Paper & 6.52 \\\cline{2-3}
+            \hline
+        \end{tabular}
+        \centering
+        }
 
-    \section*{Attachments}
-    %Make sure to change these
-    Lab Notes, HelloWorld.ic, FooBar.ic
-    %\fi %comment me out
+        \item {Supervised images generation
 
-    \begin{thebibliography}{9}
-        \bibitem{Robotics} Fred G. Martin \emph{Robotics Explorations: A Hands-On Introduction to Engineering}. New Jersey: Prentice Hall.
-        \bibitem{Flueck}  Flueck, Alexander J. 2005. \emph{ECE 100}[online]. Chicago: Illinois Institute of Technology, Electrical and Computer Engineering Department, 2005 [cited 30
-        August 2005]. Available from World Wide Web: (http://www.ece.iit.edu/~flueck/ece100).
-    \end{thebibliography}
+        \begin{center}
+            \begin{figure}[H]{\textwidth}
+                \centring
+                \begin{subfigure}[b]{\textwidth}
+                    \centering
+                    \begin{subfigure}[b]{0.15\textwidth}
+                        \includegraphics[width=\linewidth, height=\linewidth]{figures/our_mnist_supervised.png}
+                    \end{subfigure}%
+                    \begin{subfigure}[b]{0.15\textwidth}
+                        \includegraphics[width=\linewidth, height=\linewidth]{figures/paper_mnist_supervised.png}
+                    \end{subfigure}%
+                    \caption{MNIST}
+                \end{subfigure}
+                \begin{subfigure}[b]{\textwidth}
+                    \centering
+                    \begin{subfigure}[b]{0.15\textwidth}
+                        \includegraphics[width=\linewidth, height=\linewidth]{figures/our_cifar_supervised.png}
+                    \end{subfigure}%
+                    \begin{subfigure}[b]{0.15\textwidth}
+                        \includegraphics[width=\linewidth, height=\linewidth]{figures/paper_cifar_supervised.png}
+                    \end{subfigure}%
+                    \caption{CIFAR}
+                \end{subfigure}
+                \caption{Results for supervised learning the different datasets}
+            \end{figure}
+        \end{center}
+        }
+    \end{itemize}
+
+
+    \section*{Contribution}
+    \begin{itemize}
+        \item {Belozerova Polina: reading papers, ...}
+        \item {Safin Alexander: reading papers, ...}
+        \item {Pavlovskaia Natalia: reading papers, code for training procedure, images generation}
+    \end{itemize}
+
+    \nocite{*} % Print all references regardless of whether they were cited in the poster or not
+    \bibliographystyle{plain} % Plain referencing style
+    \bibliography{sample}
+    % Use the example bibliography file sample.bib
 
 \end{document}
