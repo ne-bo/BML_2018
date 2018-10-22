@@ -33,8 +33,8 @@ class MnistModel(BaseModel):
         # In one phase, termed the prior improvement phase,
         # we update the code generator with the loss function in Eq. (4), by fixing the encoder
         if phase == 'PriorImprovement':
-            # unfreeze_network(self.code_generator)
-            # freeze_network(self.encoder)
+            unfreeze_network(self.code_generator)
+            freeze_network(self.encoder)
             # pass the noise
             dec_z_c = self.decoder(z_c)
             d_i_dec_z_c, _, _ = self.d_i(dec_z_c)
@@ -47,8 +47,8 @@ class MnistModel(BaseModel):
         # In the other phase, termed the AAE phase,
         # we fix the code generator and update the autoencoder following the training procedure of AAE.
         if phase == 'AAE':
-            # unfreeze_network(self.encoder)
-            #freeze_network(self.code_generator)
+            unfreeze_network(self.encoder)
+            freeze_network(self.code_generator)
             # pass the noise
             d_c_z_c = self.d_c(z_c)
             # pass the image

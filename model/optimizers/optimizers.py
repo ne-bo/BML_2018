@@ -22,13 +22,13 @@ class OurOptimizersAndSchedulers():
         self.d_c_optimizer = get_instance(optim, 'optimizer_d_c', config,
                                           get_trainable_params(model.d_c))
 
-        self.encoder_scheduler = get_instance(optim.lr_scheduler, 'lr_scheduler', config,
+        self.encoder_scheduler = get_instance(optim.lr_scheduler, 'lr_scheduler_encoder', config,
                                               self.encoder_optimizer)
-        self.decoder_scheduler = get_instance(optim.lr_scheduler, 'lr_scheduler', config,
+        self.decoder_scheduler = get_instance(optim.lr_scheduler, 'lr_scheduler_decoder', config,
                                               self.decoder_optimizer)
-        self.code_generator_scheduler = get_instance(optim.lr_scheduler, 'lr_scheduler', config,
+        self.code_generator_scheduler = get_instance(optim.lr_scheduler, 'lr_scheduler_code_generator', config,
                                                      self.code_generator_optimizer)
-        self.d_i_scheduler = get_instance(optim.lr_scheduler, 'lr_scheduler', config,
+        self.d_i_scheduler = get_instance(optim.lr_scheduler, 'lr_scheduler_d_i', config,
                                           self.d_i_optimizer)
-        self.d_c_scheduler = get_instance(optim.lr_scheduler, 'lr_scheduler', config,
+        self.d_c_scheduler = get_instance(optim.lr_scheduler, 'lr_scheduler_d_c', config,
                                           self.d_c_optimizer)

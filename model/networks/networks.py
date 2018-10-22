@@ -242,7 +242,7 @@ class ImageDiscriminator(Module):
         x1 = x1.view(x1.shape[0], x1.shape[1], 1, 1)
         x10 = self.fc10(x)
 
-        return x1, x10, map_F
+        return x1, x10, map_F.view(-1, 1)
 
 
 # Code Discriminator
