@@ -6,7 +6,6 @@ from torchvision.utils import save_image
 
 
 def generate_images(code_generator, decoder, save_path, epoch, device, images_number=10):
-    torch.random.manual_seed(1986)
     z = torch.randn(images_number, code_generator.noise_size, 1, 1, requires_grad=True, device=device)
 
     samples = decoder(code_generator(z))

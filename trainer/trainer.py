@@ -1,11 +1,11 @@
 import numpy as np
 import torch
 from torch.autograd import Variable
+from torch.nn import BCELoss, MSELoss
 from torchvision.utils import make_grid
 
 from base import BaseTrainer
 from utils.generate_images import generate_images
-from torch.nn import BCELoss, MSELoss
 
 
 class Trainer(BaseTrainer):
@@ -114,12 +114,74 @@ class Trainer(BaseTrainer):
         return log
 
     def original_paper(self, batch_size, criterion, ones_label, x, zeros_label):
-        torch.random.manual_seed(1986)
+        l_c, l_combined, l_rec, l_rec_multiplied, z = self.prepare_AAE_update(batch_size, criterion, ones_label, x,
+                                                                              zeros_label)
 
+        self.update_d_c(l_c)
+
+        self.update_decoder(l_rec_multiplied)
+        self.update_encoder(l_combined)
+
+        for i in range(2):
+            l_c, l_combined, l_rec, l_rec_multiplied, z = self.prepare_AAE_update(batch_size, criterion, ones_label, x,
+                                                                                  zeros_label)
+            self.update_decoder(l_rec_multiplied)
+            self.update_encoder(l_combined)
+
+        d_i_x, d_i_dec_z_c, d_i_x_rec = self.model(x, z, phase='PriorImprovement')
+
+        l_i, l_i_part, minus_l_i = self.calculate_losses_for_PI_phase(criterion, d_i_dec_z_c, d_i_x, d_i_x_rec,
+                                                                      ones_label, zeros_label)
+
+        self.update_d_i(l_i)
+
+        self.update_code_generator(l_i_part)
+
+        self.update_decoder(minus_l_i)
+
+        return l_c, l_i, l_rec
+
+    def prepare_AAE_update(self, batch_size, criterion, ones_label, x, zeros_label):
         z = self.config['z_scale'] * torch.randn(batch_size, self.model.noise_size, 1, 1,
                                                  requires_grad=True, device=self.device)
         d_c_enc_x, d_c_z_c, x_rec = self.model(x, z, phase='AAE')
+        l_c, l_combined, l_rec, l_rec_multiplied = self.calculate_losses_for_AAE_phase(criterion, d_c_enc_x, d_c_z_c,
+                                                                                       ones_label, x, x_rec,
+                                                                                       zeros_label)
+        return l_c, l_combined, l_rec, l_rec_multiplied, z
 
+    def update_code_generator(self, l_i_part):
+        self.optimizers_and_schedulers.code_generator_optimizer.zero_grad()
+        l_i_part.backward(retain_graph=True)
+        self.optimizers_and_schedulers.code_generator_optimizer.step()
+
+    def update_d_i(self, l_i):
+        self.optimizers_and_schedulers.d_i_optimizer.zero_grad()
+        l_i.backward(retain_graph=True)
+        self.optimizers_and_schedulers.d_i_optimizer.step()
+
+    def calculate_losses_for_PI_phase(self, criterion, d_i_dec_z_c, d_i_x, d_i_x_rec, ones_label, zeros_label):
+        l_i_part = criterion(d_i_x, zeros_label) + criterion(d_i_dec_z_c, ones_label)
+        l_i = l_i_part + criterion(d_i_x_rec, ones_label)
+        minus_l_i = -l_i
+        return l_i, l_i_part, minus_l_i
+
+    def update_encoder(self, l_combined):
+        self.optimizers_and_schedulers.encoder_optimizer.zero_grad()
+        l_combined.backward()
+        self.optimizers_and_schedulers.encoder_optimizer.step()
+
+    def update_decoder(self, l_rec_multiplied):
+        self.optimizers_and_schedulers.decoder_optimizer.zero_grad()
+        l_rec_multiplied.backward(retain_graph=True)
+        self.optimizers_and_schedulers.decoder_optimizer.step()
+
+    def update_d_c(self, l_c):
+        self.optimizers_and_schedulers.d_c_optimizer.zero_grad()
+        l_c.backward(retain_graph=True)
+        self.optimizers_and_schedulers.d_c_optimizer.step()
+
+    def calculate_losses_for_AAE_phase(self, criterion, d_c_enc_x, d_c_z_c, ones_label, x, x_rec, zeros_label):
         l_c = criterion(d_c_enc_x, ones_label) + criterion(d_c_z_c, zeros_label)
         _, _, map_F_x = self.model.d_i(x)
         _, _, map_F_x_rec = self.model.d_i(x_rec)
@@ -127,36 +189,7 @@ class Trainer(BaseTrainer):
         l_rec = MSELoss()(map_F_x_rec, map_F_x)  # ((map_F_x - map_F_x_rec) ** 2).mean()
         l_combined = l_rec - l_c
         l_rec_multiplied = 20.0 * l_rec
-
-        self.optimizers_and_schedulers.d_c_optimizer.zero_grad()
-        l_c.backward(retain_graph=True)
-        self.optimizers_and_schedulers.d_c_optimizer.step()
-        self.optimizers_and_schedulers.decoder_optimizer.zero_grad()
-        l_rec_multiplied.backward(retain_graph=True)
-        self.optimizers_and_schedulers.decoder_optimizer.step()
-        self.optimizers_and_schedulers.encoder_optimizer.zero_grad()
-        l_combined.backward()
-        self.optimizers_and_schedulers.encoder_optimizer.step()
-
-        d_i_x, d_i_dec_z_c, d_i_x_rec = self.model(x, z, phase='PriorImprovement')
-
-        l_i_part = criterion(d_i_x, zeros_label) + criterion(d_i_dec_z_c, ones_label)
-        l_i = l_i_part + criterion(d_i_x_rec, ones_label)
-        minus_l_i = -l_i
-
-        self.optimizers_and_schedulers.d_i_optimizer.zero_grad()
-        l_i.backward(retain_graph=True)
-        self.optimizers_and_schedulers.d_i_optimizer.step()
-
-        self.optimizers_and_schedulers.code_generator_optimizer.zero_grad()
-        l_i_part.backward(retain_graph=True)
-        self.optimizers_and_schedulers.code_generator_optimizer.step()
-
-        self.optimizers_and_schedulers.decoder_optimizer.zero_grad()
-        minus_l_i.backward()
-        self.optimizers_and_schedulers.decoder_optimizer.step()
-
-        return l_c, l_i, l_rec
+        return l_c, l_combined, l_rec, l_rec_multiplied
 
     def working_approach(self, batch_idx, batch_size, criterion, epoch, ones_label, total_loss, x, zeros_label):
         z = self.config['z_scale'] * torch.randn(batch_size, self.model.noise_size, 1, 1,
@@ -164,17 +197,13 @@ class Trainer(BaseTrainer):
         d_i_x, d_i_dec_z_c, d_i_x_rec = self.model(x, z, phase='PriorImprovement')
         d_c_enc_x, d_c_z_c, x_rec = self.model(x, z, phase='AAE')
         l_i = criterion(d_i_x, ones_label) + criterion(d_i_dec_z_c, zeros_label) + criterion(d_i_x_rec, zeros_label)
-        self.optimizers_and_schedulers.d_i_optimizer.zero_grad()
-        l_i.backward(retain_graph=True)
-        self.optimizers_and_schedulers.d_i_optimizer.step()
+        self.update_d_i(l_i)
         _, _, map_F_x = self.model.d_i(x)
         _, _, map_F_x_rec = self.model.d_i(x_rec)
         l_rec = ((map_F_x - map_F_x_rec) ** 2).mean()
         gamma = 7.5  # 15.0
         loss_combined = -l_i + gamma * l_rec
-        self.optimizers_and_schedulers.decoder_optimizer.zero_grad()
-        loss_combined.backward(retain_graph=True)
-        self.optimizers_and_schedulers.decoder_optimizer.step()
+        self.update_decoder(loss_combined)
         lyambda = 2.5  # 5.0
         loss_rec_multiplied = l_rec * lyambda
         self.optimizers_and_schedulers.encoder_optimizer.zero_grad()

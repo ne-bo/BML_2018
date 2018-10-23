@@ -90,12 +90,18 @@ class Encoder(Module):
             ResidualBlock(in_channels=256, out_channels=256)
         )
 
-        self.pooling = AvgPool2d(kernel_size=2, stride=1)  # kernel size 2 for MNIST
+        if self.input_image_size == 28:
+            self.pooling = AvgPool2d(kernel_size=2, stride=1)  # kernel size 2 for MNIST
+
+        if self.input_image_size == 32:
+            self.pooling = AvgPool2d(kernel_size=3, stride=1)  # kernel size 3 for CIFAR
+
         self.fc1 = Sequential(
             Linear(256, 2 * code_size),
             BatchNorm1d(2 * code_size),
             ReLU()
         )
+
         self.fc2 = Linear(2 * code_size, code_size)
 
     def forward(self, x):
@@ -125,9 +131,10 @@ class Encoder(Module):
 # 4 x 4 up sampling residual block 64 stride 2 -- I've removed third upsampling for MNIST
 # 3 x 3 conv. image channels Tanh
 class Decoder(Module):
-    def __init__(self, code_size=8, out_image_channels=1):
+    def __init__(self, code_size=8, out_image_channels=1, output_image_size=28):
         super(Decoder, self).__init__()
         self.code_size = code_size
+        self.output_image_size = output_image_size
 
         # kernel size 7 for MNIST
         self.upconv = ConvTranspose2d(in_channels=code_size, out_channels=512, kernel_size=7, stride=2)
@@ -141,11 +148,23 @@ class Decoder(Module):
             ResidualBlock(in_channels=128, out_channels=128)
         )
 
-        self.conv = Sequential(
-            # kernel size 7 for MNIST
-            Conv2d(in_channels=128, out_channels=out_image_channels, kernel_size=7),
-            Tanh()
+        self.up_sampling3 = Sequential(
+            Up(in_channels=128, out_channels=64, kernel_size=4, stride=1, padding=0),
+            ResidualBlock(in_channels=64, out_channels=64)
         )
+
+        if self.output_image_size == 28:
+            self.conv = Sequential(
+                # kernel size 7 for MNIST
+                Conv2d(in_channels=128, out_channels=out_image_channels, kernel_size=7),
+                Tanh()
+            )
+        if self.output_image_size == 32:
+            self.conv = Sequential(
+                # kernel size 4 for CIFAR
+                Conv2d(in_channels=64, out_channels=out_image_channels, kernel_size=6),
+                Tanh()
+            )
 
     def forward(self, x):
         assert x.shape[1] == self.code_size
@@ -154,6 +173,10 @@ class Decoder(Module):
 
         x = self.up_sampling1(x)
         x = self.up_sampling2(x)
+
+        if self.output_image_size == 32:
+            x = self.up_sampling3(x)
+
         x = self.conv(x)
 
         return x
@@ -210,11 +233,20 @@ class ImageDiscriminator(Module):
             BatchNorm2d(num_features=128),
             LeakyReLU()
         )
-        self.conv3 = Sequential(  # kernel_size=7, stride=3 for MNIST
-            Conv2d(in_channels=128, out_channels=256, kernel_size=7, stride=3, padding=1),
-            BatchNorm2d(num_features=256),
-            LeakyReLU()
-        )
+        if self.input_image_size == 28:
+            self.conv3 = Sequential(  # kernel_size=7, stride=3 for MNIST
+                Conv2d(in_channels=128, out_channels=256, kernel_size=7, stride=3, padding=1),
+                BatchNorm2d(num_features=256),
+                LeakyReLU()
+            )
+
+        if self.input_image_size == 32:
+            self.conv3 = Sequential(  # kernel_size=8, stride=3 for CIFAR
+                Conv2d(in_channels=128, out_channels=256, kernel_size=8, stride=3, padding=1),
+                BatchNorm2d(num_features=256),
+                LeakyReLU()
+            )
+
         self.fc = Sequential(
             Linear(256, 1000),
             LeakyReLU()

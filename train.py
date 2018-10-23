@@ -12,6 +12,7 @@ from utils import Logger, get_instance
 
 
 def main(config, resume):
+    torch.random.manual_seed(1986)
     torch.cuda.empty_cache()
     train_logger = Logger()
 

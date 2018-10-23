@@ -15,3 +15,18 @@ class MnistDataLoader(BaseDataLoader):
         self.data_dir = data_dir
         self.dataset = datasets.MNIST(self.data_dir, train=training, download=True, transform=trsfm)
         super(MnistDataLoader, self).__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
+
+
+class CifarDataLoader(BaseDataLoader):
+    """
+    CIFAR data loading demo using BaseDataLoader
+    """
+
+    def __init__(self, data_dir, batch_size, shuffle, validation_split, num_workers, training=True):
+        trsfm = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
+        ])
+        self.data_dir = data_dir
+        self.dataset = datasets.CIFAR10(self.data_dir, train=training, download=True, transform=trsfm)
+        super(CifarDataLoader, self).__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)

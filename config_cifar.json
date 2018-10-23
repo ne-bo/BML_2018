@@ -1,0 +1,136 @@
+{
+  "name": "Cifar_AAEP",
+  "n_gpu": 1,
+  "arch": {
+    "type": "CifarModel",
+    "args": {}
+  },
+  "data_loader": {
+    "type": "CifarDataLoader",
+    "args": {
+      "data_dir": "data/",
+      "batch_size": 64,
+      "shuffle": true,
+      "validation_split": 0.1,
+      "num_workers": 2
+    }
+  },
+  "optimizer_encoder": {
+    "type": "RMSprop",
+    "args": {
+      "lr": 0.000001,
+      "weight_decay": 0.00001,
+      "momentum": 0.9
+      //"amsgrad": true
+    }
+  },
+  "optimizer_decoder": {
+    "type": "RMSprop",
+    "args": {
+      "lr": 0.00001,
+      "weight_decay": 0.00001,
+      "momentum": 0.9
+      //"amsgrad": true
+    }
+  },
+  "optimizer_code_generator": {
+    "type": "RMSprop",
+    "args": {
+      "lr": 0.00003,
+      "weight_decay": 0.00001,
+      "momentum": 0.9
+      //"amsgrad": true
+    }
+  },
+  "optimizer_d_i": {
+    "type": "RMSprop",
+    "args": {
+      "lr": 0.00003,
+      "weight_decay": 0.0001,
+      "momentum": 0.9
+      //"amsgrad": true
+    }
+  },
+  "optimizer_d_c": {
+    "type": "RMSprop",
+    "args": {
+      "lr": 0.000003,
+      "weight_decay": 0.001,
+      "momentum": 0.9
+      //"amsgrad": true
+    }
+  },
+  "loss": "nll_loss",
+  "metrics": [
+    "my_metric",
+    "my_metric2"
+  ],
+  "lr_scheduler_freq": 5,
+  "lr_scheduler_encoder": {
+    "type": "MultiStepLR",
+    "args": {
+      "milestones": [
+        6,
+        10
+      ],
+      "gamma": 0.9
+    }
+  },
+  "lr_scheduler_decoder": {
+    "type": "MultiStepLR",
+    "args": {
+      "milestones": [
+        6,
+        8,
+        10
+      ],
+      "gamma": 0.9
+    }
+  },
+  "lr_scheduler_code_generator": {
+    "type": "MultiStepLR",
+    "args": {
+      "milestones": [
+        6,
+        8,
+        10
+      ],
+      "gamma": 0.9
+    }
+  },
+  "lr_scheduler_d_i": {
+    "type": "MultiStepLR",
+    "args": {
+      "milestones": [
+        6,
+        8,
+        10
+      ],
+      "gamma": 0.9
+    }
+  },
+  "lr_scheduler_d_c": {
+    "type": "MultiStepLR",
+    "args": {
+      "milestones": [
+        6,
+        10
+      ],
+      "gamma": 0.9
+    }
+  },
+  "trainer": {
+    "epochs": 1000,
+    "save_dir": "saved/",
+    "save_freq": 1,
+    "verbosity": 2,
+    "monitor": "loss",
+    "monitor_mode": "min"
+  },
+  "visualization": {
+    "tensorboardX": true,
+    "log_dir": "saved/runs"
+  },
+  "generated_images_path": "/home/natasha/generated_images",
+  "z_scale": 5.0
+}
