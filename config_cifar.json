@@ -18,7 +18,7 @@
   "optimizer_encoder": {
     "type": "RMSprop",
     "args": {
-      "lr": 0.000001,
+      "lr": 0.0000001,
       "weight_decay": 0.00001,
       "momentum": 0.9
       //"amsgrad": true
@@ -27,7 +27,7 @@
   "optimizer_decoder": {
     "type": "RMSprop",
     "args": {
-      "lr": 0.00001,
+      "lr": 0.000001,
       "weight_decay": 0.00001,
       "momentum": 0.9
       //"amsgrad": true
@@ -36,7 +36,7 @@
   "optimizer_code_generator": {
     "type": "RMSprop",
     "args": {
-      "lr": 0.00003,
+      "lr": 0.000003,
       "weight_decay": 0.00001,
       "momentum": 0.9
       //"amsgrad": true
@@ -45,7 +45,7 @@
   "optimizer_d_i": {
     "type": "RMSprop",
     "args": {
-      "lr": 0.00003,
+      "lr": 0.000003,
       "weight_decay": 0.0001,
       "momentum": 0.9
       //"amsgrad": true
@@ -54,7 +54,7 @@
   "optimizer_d_c": {
     "type": "RMSprop",
     "args": {
-      "lr": 0.000003,
+      "lr": 0.0000003,
       "weight_decay": 0.001,
       "momentum": 0.9
       //"amsgrad": true

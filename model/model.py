@@ -58,7 +58,7 @@ class MnistModel(BaseModel):
 
 
 class CifarModel(BaseModel):
-    def __init__(self, input_image_channels=3, out_image_channels=3, code_size=8, noise_size=8, input_image_size=32):
+    def __init__(self, input_image_channels=3, out_image_channels=3, code_size=64, noise_size=64, input_image_size=32):
         super(CifarModel, self).__init__()
 
         self.code_size = code_size

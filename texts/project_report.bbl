@@ -1,7 +1,18 @@
 \begin{thebibliography}{1}
 
-\bibitem{original_paper}
-Learning priors for adversarial autoencoders.
+\bibitem{original}
+Hui-Po Wang.
+\newblock Learning priors for adversarial autoencoders.
 \newblock 2018.
+
+\bibitem{DBLP:journals/corr/MakhzaniSJG15}
+Alireza Makhzani, Jonathon Shlens, Navdeep Jaitly, and Ian~J. Goodfellow.
+\newblock Adversarial autoencoders.
+\newblock {\em CoRR}, abs/1511.05644, 2015.
+
+\bibitem{DBLP:journals/corr/LarsenSW15}
+Anders Boesen~Lindbo Larsen, S{\o}ren~Kaae S{\o}nderby, and Ole Winther.
+\newblock Autoencoding beyond pixels using a learned similarity metric.
+\newblock {\em CoRR}, abs/1512.09300, 2015.
 
 \end{thebibliography}

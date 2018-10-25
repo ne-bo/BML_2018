@@ -122,7 +122,7 @@ class Trainer(BaseTrainer):
         self.update_decoder(l_rec_multiplied)
         self.update_encoder(l_combined)
 
-        for i in range(2):
+        for i in range(3):
             l_c, l_combined, l_rec, l_rec_multiplied, z = self.prepare_AAE_update(batch_size, criterion, ones_label, x,
                                                                                   zeros_label)
             self.update_decoder(l_rec_multiplied)
