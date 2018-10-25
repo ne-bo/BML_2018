@@ -25,5 +25,7 @@ Team members:
 
 [The report PDF] 
 
+This repository contains 3 branches corresponding to the teammates.
+
 [LEARNING PRIORS FOR ADVERSARIAL AUTOENCODERS]:https://github.com/ne-bo/BML_2018/blob/master/texts/Learn%20prior%20for%20baeysian%20model%20in%20adversarial%20setting.pdf
 [The report PDF]:https://github.com/ne-bo/BML_2018/blob/master/texts/project_report.pdf

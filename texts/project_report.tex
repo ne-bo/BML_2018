@@ -2,7 +2,7 @@
 
 
 \usepackage{arxiv}
-
+\usepackage{float}
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
 \usepackage{hyperref}       % hyperlinks
@@ -13,6 +13,13 @@
 \usepackage{microtype}      % microtypography
 \usepackage{lipsum}
 \usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[compact]{titlesec}
+\titlespacing{\section}{0pt}{*0}{*0}
+\titlespacing{\subsection}{0pt}{*0}{*0}
+\titlespacing{\subsubsection}{0pt}{*0}{*0}
+
 
 \title{Learning priors for adversarial autoencoders}
 
@@ -35,37 +42,27 @@ Skoltech\\
     \maketitle
 
     \begin{abstract}
+        Most deep latent factor models choose simple priors for simplicity, tractability or
+        not knowing what prior to use. Recent studies show that the choice of the prior
+        may have a profound effect on the expressiveness of the model, especially when
+        its generative network has limited capacity. In this paper, we propose to learn a
+        proper prior from data for adversarial autoencoders (AAEs). We introduce the
+        notion of code generators to transform manually selected simple priors into ones
+        that can better characterize the data distribution. Experimental results show that
+        the proposed model can generate better image quality and learn better disentangled
+        representations than AAEs in both supervised and unsupervised settings. Lastly,
+        we present its ability to do cross-domain translation in a text-to-image synthesis
+        task.
+
         We took here several attempts to create a generative model. The main source of inspiration is \cite{original}.
         The results are presented for MNIST and CIFAR-10 datasets.
         We haven't achieve the same quality as in the original paper, but learnt a lot.
     \end{abstract}
 
-
-    % keywords can be removed
-    \keywords{AAE \and GAN }
-
-
     \section{Introduction}
 
     \subsection{Goal}
     Our goal is to reproduce the "Learning priors for adversarial autoencoders" \cite{original}
-
-
-    \subsection{Description}
-
-    Most deep latent factor models choose simple priors for simplicity, tractability or
-    not knowing what prior to use. Recent studies show that the choice of the prior
-    may have a profound effect on the expressiveness of the model, especially when
-    its generative network has limited capacity. In this paper, we propose to learn a
-    proper prior from data for adversarial autoencoders (AAEs). We introduce the
-    notion of code generators to transform manually selected simple priors into ones
-    that can better characterize the data distribution. Experimental results show that
-    the proposed model can generate better image quality and learn better disentangled
-    representations than AAEs in both supervised and unsupervised settings. Lastly,
-    we present its ability to do cross-domain translation in a text-to-image synthesis
-    task.
-
-
 
     \section{Algorithms}
 
@@ -74,35 +71,42 @@ Skoltech\\
     Sasha put here the algorithm description
 
 
-    \subsection{Original paper algorithm scheme}
-    \begin{figure}[!h]
-        \includegraphics[width=1\textwidth]{figures/original.png}
-        \caption{Original paper algorithm scheme}
-    \end{figure}
+    \subsection{Original paper algorithm}
 
-    \subsection{Original paper algorithm pseudo code}
-    \begin{figure}[!h]
-        \includegraphics[width=0.6\textwidth]{figures/original-code.png}
-        \caption{Original paper algorithm pseudo code}
-    \end{figure}
-
+    \begin{center}
+        \begin{figure}[H]{\textwidth}
+            \begin{subfigure}{0.5\textwidth}
+                \centering
+                \includegraphics[width=0.75\linewidth]{figures/original-code.png}
+                \caption{Original paper algorithm pseudo code}
+            \end{subfigure}
+            \begin{subfigure}{0.5\textwidth}
+                \centering
+                \includegraphics[width=0.75\linewidth]{figures/original.png}
+                \caption{Original paper algorithm scheme}
+            \end{subfigure}%
+            \caption{Original paper algorithm}
+        \end{figure}
+    \end{center}
 
     \subsection{Additional algorithm}
-    Is inspired by
+    Is inspired by "Autoencoding beyond pixels using a learned similarity metric"\cite{DBLP:journals/corr/LarsenSW15}
 
-    "Autoencoding beyond pixels using a learned similarity metric"\cite{DBLP:journals/corr/LarsenSW15}
-    % Commands to include a figure:
-    \begin{figure}[!h]
-        \includegraphics[width=\textwidth]{figures/additional.png}
-        \caption{Additional algorithm scheme}
-    \end{figure}
-
-
-    \subsection{Additional algorithm pseudo code}
-    \begin{figure}[!h]
-        \includegraphics[width=0.7\textwidth]{figures/additional-code.png}
-        \caption{Additional algorithm pseudo code}
-    \end{figure}
+    \begin{center}
+        \begin{figure}[H]{\textwidth}
+            \begin{subfigure}{0.5\textwidth}
+                \centering
+                \includegraphics[width=0.5\linewidth]{figures/additional-code.png}
+                \caption{Additional paper algorithm pseudo code}
+            \end{subfigure}
+            \begin{subfigure}{0.5\textwidth}
+                \centering
+                \includegraphics[width=0.5\linewidth]{figures/additional.png}
+                \caption{Additional paper algorithm scheme}
+            \end{subfigure}%
+            \caption{Additional paper algorithm}
+        \end{figure}
+    \end{center}
 
 
     \section{Data}
@@ -134,37 +138,52 @@ Skoltech\\
     \subsection{Results for AAE}
     Sasha put here your pictures
 
-    \subsection{Results evolution for original paper. MNIST.}
-    The most enchanting thing here is evolution with epochs
-    \begin{figure}[!h]
-        \includegraphics[width=\textwidth]{figures/MNIST-original-evolution.png}
-        \caption{Results evolution for original paper. MNIST}
-    \end{figure}
+    \subsection{Results for original paper}
 
-    \subsection{Results for original paper. MNIST, 67 epoch.}
-    \begin{figure}[!h]
-        \includegraphics[width=0.7\textwidth]{figures/samples_67.jpg}
-        \caption{Results for original paper. MNIST, 67 epoch}
-    \end{figure}
+    The most enchanting thing here is evolution with epochs.
+    The results for CIFAR are not good at all. Here the latent dimension is 8 the same as for MNIST.
 
-    \subsection{Results evolution for original paper. CIFAR.}
-    The results are not good at all. Here the latent dimension is 8 the same as for MNIST.
-    \begin{figure}[!h]
-        \includegraphics[width=\textwidth]{figures/CIFAR-original-evolution.png}
-        \caption{Results evolution for original paper. CIFAR}
-    \end{figure}
 
-    \subsection{Results for original paper. CIFAR, 55 epoch.}
-    \begin{figure}[!h]
-        \includegraphics[width=0.7\textwidth]{figures/samples_55.jpg}
-        \caption{Results for original paper. CIFAR, 55 epoch}
-    \end{figure}
+    \begin{center}
+        \begin{figure}[H]{\textwidth}
+            \begin{subfigure}[b]{\textwidth}
+                \centering
+                \includegraphics[width=0.7\linewidth]{figures/MNIST-original-evolution.png}
+                \caption{MNIST}
+            \end{subfigure}
+            \begin{subfigure}[b]{\textwidth}
+                \centering
+                \includegraphics[width=0.7\linewidth]{figures/CIFAR-original-evolution.png}
+                \caption{CIFAR}
+            \end{subfigure}
+            \caption{Results evolution for original paper}
+        \end{figure}
+    \end{center}
+
+    \begin{center}
+        \begin{figure}[H]{\textwidth}
+            \begin{subfigure}{0.5\textwidth}
+                \centering
+                \includegraphics[width=0.5\linewidth]{figures/samples_67.jpg}
+                \caption{MNIST, 67 epochs}
+            \end{subfigure}
+            \begin{subfigure}{0.5\textwidth}
+                \centering
+                \includegraphics[width=0.5\linewidth]{figures/samples_55.jpg}
+                \caption{CIFAR, 55 epochs}
+            \end{subfigure}%
+            \caption{Original paper algorithm results for the latest epochs}
+        \end{figure}
+    \end{center}
 
     \subsection{Results for additional algorithm}
-    \begin{figure}[!h]
-        \includegraphics[width=\textwidth]{figures/MNIST-additional-evolution.png}
-        \caption{Results evolution for additional algorithm. MNIST}
-    \end{figure}
+    \begin{center}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.7\textwidth]{figures/MNIST-additional-evolution.png}
+            \caption{Results evolution for additional algorithm. MNIST}
+        \end{figure}
+    \end{center}
 
     \subsection{Conclusions}
     \begin{itemize}
