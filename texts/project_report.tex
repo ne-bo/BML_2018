@@ -65,14 +65,16 @@ Skoltech\\
     Our goal is to reproduce the "Learning priors for adversarial autoencoders" \cite{original}
 
     \section{Algorithms}
-
     \subsection{Adversarial Autoencoder}
-    "Adversarial Autoencoders" \cite{DBLP:journals/corr/MakhzaniSJG15}
-    Sasha put here the algorithm description
-
-
+    Our baseline model is "Adversarial Autoencoders" \cite{DBLP:journals/corr/MakhzaniSJG15}
+    \begin{center}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.25\textwidth]{figures/aae.png}
+            \caption{Adversarial Autoencoder scheme}
+        \end{figure}
+    \end{center}
     \subsection{Original paper algorithm}
-
     \begin{center}
         \begin{figure}[H]{\textwidth}
             \begin{subfigure}{0.5\textwidth}
@@ -91,7 +93,6 @@ Skoltech\\
 
     \subsection{Additional algorithm}
     Is inspired by "Autoencoding beyond pixels using a learned similarity metric"\cite{DBLP:journals/corr/LarsenSW15}
-
     \begin{center}
         \begin{figure}[H]{\textwidth}
             \begin{subfigure}{0.5\textwidth}
@@ -110,15 +111,9 @@ Skoltech\\
 
 
     \section{Data}
-
-    \begin{itemize}
-        \item MNIST
-        \item CIFAR-10
-    \end{itemize}
-
+    We made experiments for MNIST and CIFAR-10 datasets.
 
     \section{Problems and solutions}
-
     Problems
     \begin{itemize}
         \item Different formulae in the text and the pseudo code in the original paper
@@ -131,56 +126,101 @@ Skoltech\\
         \item Several updates of encoder-decoder
         \item Adjusting learning rates
     \end{itemize}
-
-
     \section{Results}
-
-    \subsection{Results for AAE}
-    Sasha put here your pictures
-
-    \subsection{Results for original paper}
-
-    The most enchanting thing here is evolution with epochs.
-    The results for CIFAR are not good at all. Here the latent dimension is 8 the same as for MNIST.
-
-
+    \subsection{Results for AAE, Alexander}
     \begin{center}
-        \begin{figure}[H]{\textwidth}
-            \begin{subfigure}[b]{\textwidth}
-                \centering
-                \includegraphics[width=0.7\linewidth]{figures/MNIST-original-evolution.png}
-                \caption{MNIST}
-            \end{subfigure}
-            \begin{subfigure}[b]{\textwidth}
-                \centering
-                \includegraphics[width=0.7\linewidth]{figures/CIFAR-original-evolution.png}
-                \caption{CIFAR}
-            \end{subfigure}
-            \caption{Results evolution for original paper}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.2\textwidth]{figures/aae_epoch100.png}
+            \caption{Samples from AAE on MNIST}
         \end{figure}
     \end{center}
-
+    \subsection{Results for original paper}
+    \subsection{Alexander's results}
+    Training approach
+    \begin{itemize}
+        \item AAE-phase:\\
+        \begin{itemize}
+            \item Encoder update: $-\log(D_{code}(fake)+\varepsilon)) + L2$
+            \item Code disc update (every 5 steps): \\ $-\left(\log(D_{code}(real)+\varepsilon) + \log(1 - D_{code}(fake)+\varepsilon)\right)$
+            \item Decoder update: $L2$
+        \end{itemize}\\
+        \item Prior improvement phase (once in epoch):\\
+        \begin{itemize}
+            \item Decoder update: $-\log(D_{code}(sampled)+\varepsilon))$
+            \item Code gen update: $-\log(D_{code}(sampled)+\varepsilon))$
+            \item Image disc update:
+            \begin{equation*}
+                \begin{split}
+                    &-(\log(D_{code}(real)+\varepsilon) + \log(1 - D_{code}(fake)+\varepsilon) + \\
+                    &+ \log(1 - D_{code}(sampled)+\varepsilon) ) \\
+                \end{split}
+            \end{equation*}
+        \end{itemize}
+    \end{itemize}
     \begin{center}
         \begin{figure}[H]{\textwidth}
             \begin{subfigure}{0.5\textwidth}
                 \centering
-                \includegraphics[width=0.5\linewidth]{figures/samples_67.jpg}
+                \includegraphics[width=0.35\linewidth]{figures/epoch8.png}
+                \caption{MNIST, 8 epochs}
+            \end{subfigure}
+            \begin{subfigure}{0.5\textwidth}
+                \centering
+                \includegraphics[width=0.35\linewidth]{figures/epoch100.png}
+                \caption{MNIST, 100 epochs}
+            \end{subfigure}%
+            \caption{Original paper algorithm results for different epochs}
+        \end{figure}
+    \end{center}
+    \begin{center}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.35\textwidth]{figures/aae_sampling_real_reconstructed.png}
+            \caption{Samples of autoencoder work. Left image is real, right is reconstructed.}
+        \end{figure}
+    \end{center}
+    \subsection{Natalia's results}
+    Training approach can be seen in git.
+
+    The most enchanting thing here is evolution with epochs.
+    The results for CIFAR are not good at all. Here the latent dimension is 8 the same as for MNIST.
+    \begin{center}
+        \begin{figure}[H]{\textwidth}
+            \begin{subfigure}{0.5\textwidth}
+                \centering
+                \includegraphics[width=0.35\linewidth]{figures/samples_67.jpg}
                 \caption{MNIST, 67 epochs}
             \end{subfigure}
             \begin{subfigure}{0.5\textwidth}
                 \centering
-                \includegraphics[width=0.5\linewidth]{figures/samples_55.jpg}
+                \includegraphics[width=0.35\linewidth]{figures/samples_55.jpg}
                 \caption{CIFAR, 55 epochs}
             \end{subfigure}%
             \caption{Original paper algorithm results for the latest epochs}
         \end{figure}
     \end{center}
+    \begin{center}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.6\textwidth]{figures/MNIST-original-evolution.png}
+            \caption{Results evolution for original paper. MNIST}
+        \end{figure}
+    \end{center}
+    \begin{center}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\textwidth]{figures/CIFAR-original-evolution.png}
+            \caption{Results evolution for original paper. CIFAR}
+        \end{figure}
+    \end{center}
+
 
     \subsection{Results for additional algorithm}
     \begin{center}
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.7\textwidth]{figures/MNIST-additional-evolution.png}
+            \includegraphics[width=0.6\textwidth]{figures/MNIST-additional-evolution.png}
             \caption{Results evolution for additional algorithm. MNIST}
         \end{figure}
     \end{center}
@@ -194,10 +234,17 @@ Skoltech\\
     \subsection{Contributions}
     \begin{itemize}
         \item Belozerova Polina: reading papers
-        \item Safin Alexander: reading papers, implement the classical AAE,
-        experiments for MNIST, corresponding parts inthe presentation and report
-        \item Pavlovskaia Natalia: reading papers, implement the original paper, implement the additional algorithm,
-        experiments for MNIST and CIFAR-10, corresponding parts inthe presentation and report
+        \item Safin Alexander: reading papers,
+        implement the classical AAE,
+        experiments for MNIST for classical AAE,
+        MNIST and CIFAR for original paper approach,
+        corresponding parts in the presentation and report
+        \item Pavlovskaia Natalia: reading papers,
+        implement the original paper,
+        implement the additional algorithm,
+        experiments for MNIST for both algorithms,
+        experiments for CIFAR-10 for original paper,
+        corresponding parts in the presentation and report
     \end{itemize}
 
     \bibliographystyle{unsrt}
